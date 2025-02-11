@@ -11,10 +11,13 @@ lambda0 = 780e-9            # Central wavelength (m)
 k0 = 2 * np.pi / lambda0    # Central wavevector (1/m)
 
 Delta_n_default_factor = 1.0
-
+kxmin=-70e3
+kxmax=70e3
+kymin=-70e3
+kymax=70e3
 # Wavevector range (in 1/m; note: 100 mm⁻¹ = 100e3 m⁻¹)
-kx_range = np.linspace(-80e3, 80e3, 100)
-ky_range = np.linspace(-80e3, 80e3, 100)
+kx_range = np.linspace(kxmin, kxmax, 100)
+ky_range = np.linspace(kymin, kymax, 100)
 KX, KY = np.meshgrid(kx_range, ky_range)
 # ---------------------------------------------------
 
@@ -43,10 +46,10 @@ app.layout = html.Div([
         dcc.Slider(
             id='kx-slider',
             min=0,
-            max=80000,
-            step=5000,
-            value=10000,
-            marks={i: f"{i//1000} mm⁻¹" for i in range(0, 81000, 20000)},
+            max=30,
+            step=1,
+            value=10,
+            marks={1: '1', 10: '10', 30: '30'},
             tooltip={"placement": "bottom", "always_visible": True},
         ),
     ], style={'width': '38%', 'display': 'inline-block', 'padding': '20px'}),
@@ -59,13 +62,14 @@ app.layout = html.Div([
     [Input('delta-n-slider', 'value'),
      Input('kx-slider', 'value')]
 )
-def update_plot(delta_n_slider_value, kx_fixed):
+def update_plot(delta_n_slider_value, kx_fixed_slider_value):
     Delta_n = delta_n_slider_value * 1e-5
+    kx_fixed = kx_fixed_slider_value * 1e3
 
     K = np.sqrt(KX**2 + KY**2)
     OmegaB = np.sqrt((K**2 / (2 * k0))**2 + K**2 * Delta_n)
     
-    ky_cut = np.linspace(-80e3, 80e3, 100)
+    ky_cut = np.linspace(kymin, kymax, 100)
     K_cut = np.sqrt(kx_fixed**2 + ky_cut**2)
     OmegaB_cut = np.sqrt((K_cut**2 / (2 * k0))**2 + K_cut**2 * Delta_n)
     OmegaB_free = (K_cut**2) / (2 * k0)
